@@ -1,15 +1,24 @@
 from selenium import webdriver
-driver = webdriver.Chrome()
+from scrapy import Spider
+from scrapy.selector import Selector
+class BooksSpider(Spider):
+    name = "books"
+    allowed_domains = ['books.toscrape.com']
+    def start_requests(self):
+        self.driver = webdriver.Chrome()
+        self.driver.get('http://books.toscrape.com')
+        sel = Selector(text=self.driver.page_source)
+        books = sel.xpath('//h3/a/@href').extract()
+        for book in books:
+            url = 'http://books.toscrape.com/'+ book
+            yield scrapy.Request(url, callback=self.parse)
+    def parse(self,response):
+        pass
 
-driver.get('https://www.lazada.com.ph/shop-laptops/')
 
-xpath='//*[@data-qa-locator="product-item"]//a[text()]'
-link_elements = driver.find_elements_by_xpath(xpath)
-links=[]
-for link_el in link_elements:
-    href=link_el.get_attribute("href")
-    print(href)
-    links.append(href)
 
-driver.quit()
-print(len(links))
+
+
+
+
+
